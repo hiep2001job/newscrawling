@@ -22,12 +22,17 @@ use Symfony\Component\DomCrawler\Crawler;
 // $strMethodName = $uri[3] . 'Action';
 // $objFeedController->{$strMethodName}();
 
+header('Access-Control-Allow-Origin: *');
 
-$base_url = 'https://arenacantho.cusc.vn';
+header('Access-Control-Allow-Methods: GET, POST');
+
+header("Access-Control-Allow-Headers: X-Requested-With");
+
+
 
 $client = new Client([
     // Base URI is used with relative requests
-    'base_uri' => $base_url,
+    'base_uri' => ARENA_URI,
     // You can set any number of default request options.
     'timeout'  => 2.0,
 ]);
