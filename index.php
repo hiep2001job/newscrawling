@@ -2,25 +2,8 @@
 require './vendor/autoload.php';
 require __DIR__ . "/inc/bootstrap.php";
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Promise\Create;
-use Symfony\Component\DomCrawler\Crawler;
 
-
-//  Real
-// $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-// $uri = explode( '/', $uri );
-
-// if ((isset($uri[2]) && $uri[2] != 'news') || !isset($uri[3])) {
-//     header("HTTP/1.1 404 Not Found");
-//     exit();
-// }
-
-// require PROJECT_ROOT_PATH . "/Controller/Api/NewsController.php";
-
-// $objFeedController = new NewsController();
-// $strMethodName = $uri[3] . 'Action';
-// $objFeedController->{$strMethodName}();
+//Enable CORS
 
 header('Access-Control-Allow-Origin: *');
 
@@ -28,39 +11,46 @@ header('Access-Control-Allow-Methods: GET, POST');
 
 header("Access-Control-Allow-Headers: X-Requested-With");
 
+ 
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = explode( '/', $uri );
 
+ 
+if ((isset($uri[2]) && $uri[2] != 'news') || !isset($uri[3])) {
+    header("HTTP/1.1 404 Not Found");
+    exit();
+}
+ 
+require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
+ 
+$objFeedController = new NewsController();
+$strMethodName = $uri[3] . 'Action';
+$objFeedController->{$strMethodName}();
 
-$client = new Client([
-    // Base URI is used with relative requests
-    'base_uri' => ARENA_URI,
-    // You can set any number of default request options.
-    'timeout'  => 2.0,
-]);
+// $controller='';
+// $method='';
+// $params='';
 
-$bodyCrawler = new Crawler($client->request('GET')->getBody()->getContents());
+// if(file_exists("../app/controllers/" . strtolower($url[2]) . ".php"))
+// 		{
 
-$result = $bodyCrawler->filter('.other-news-item')->each(function (Crawler $node, $i) {
-    return array(
-        'title' => $node->filter('.title')->text(),
-        'newsList' => array(
-            'first' => $node->filter('.news-content .css_tintuc_tbox')->each(function (Crawler $news) {
-                return array(
-                    'title' => $news->filter('div .css_tintuc_link_btitle')->text(),
-                    'description' => $news->filter('div p')->text(),
-                    'link' => ARENA_URI . $news->filter('div .css_tintuc_link_btitle')->extract(['href'])[0],
-                    'image' => ARENA_URI . $news->filter('div .cms_img_tintuc')->extract(['src'])[0],
-                );
-            }),
-            'rest' => $node->filter('.news-content .css_tintuc_tbox')->siblings()->each(function (Crawler $news) {
-                return array(
-                    'title' => $news->filter('.css_tintuc_link_title')->text(),
-                    'description' => $news->filter('div p')->text(),
-                    'link' => ARENA_URI . $news->filter('.css_tintuc_link_title')->extract(['href'])[0],
-                    'image' => ARENA_URI . $news->filter('.css_tintuc_link_title div img')->extract(['src'])[0],
-                );
-            })
-        )
+// 			$controller = strtolower($url[2]);
+// 			unset($url[2]);
+// 		}
 
-    );
-});
-echo json_encode($result);
+// 		require "../app/controllers/" . $this->controller . ".php";
+// 		$this->controller = new $this->controller;
+
+// 		if(isset($url[1]))
+// 		{
+// 			$url[1] = strtolower($url[1]);
+// 			if(method_exists($this->controller, $url[1]))
+// 			{
+// 				$this->method = $url[1];
+// 				unset($url[1]);
+// 			}
+// 		}
+
+// 		$this->params = (count($url) > 0) ? $url : ["home"];
+		
+// 		call_user_func_array([$this->controller,$this->method], $this->params);
