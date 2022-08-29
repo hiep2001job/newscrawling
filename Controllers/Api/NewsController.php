@@ -104,14 +104,20 @@ class NewsController extends BaseController
 
                     $bodyCrawler = new Crawler($response->getBody()->getContents());
 
-                    $result = $bodyCrawler->filter('#dnn_ctr1287_ModuleContent > div:nth-child(11)')
+                    $title=$bodyCrawler->filter('li.TieuDe')
+                    
+                    ->text();
+
+                    $content = $bodyCrawler->filter('#dnn_ctr1287_ModuleContent > div:nth-child(11)')
                         ->filter('td')
                         ->outerHtml();
-                    $result=str_replace('src="/','src="'.ARENA_URI.'/',$result);
-                    $result=str_replace('<ul style="padding-left:9px;">','<ul style="list-style: none; padding-left:9px;">',$result);
+                    $content=str_replace('src="/','src="'.ARENA_URI.'/',$content);
+                    $content=str_replace('<ul style="padding-left:9px;">','<ul style="list-style: none; padding-left:9px;">',$content);
 
                     
-                    $responseData = json_encode(array('content' => $result));
+                    $responseData = json_encode(array(
+                        'title'=>$title,
+                        'content' => $content));
                 }
             } catch (Error $e) {
                 $strErrorDesc = $e->getMessage() . 'Something went wrong! Please contact support.';
