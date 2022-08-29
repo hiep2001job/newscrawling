@@ -18,7 +18,7 @@ class NewsController extends BaseController
                 // Base URI is used with relative requests
                 'base_uri' => ARENA_URI,
                 // You can set any number of default request options.
-                'timeout'  => 2.0,
+                'timeout'  => 10.0,
             ]);
     }
     /**
@@ -95,32 +95,34 @@ class NewsController extends BaseController
 
         if (strtoupper($requestMethod) == 'GET' && isset($_GET['newsLink'])) {
             try {
-                $link = $_GET['newsLink'];
-                $responseData=json_encode('');
+                // $link = $_GET['newsLink'];
+                $link = 'https://arenacantho.cusc.vn/?tabid=359&NDID=12571&key=%E2%80%9CHOC_ARENA_MOI_DUNG_LA_MULTIMEDIA%E2%80%9D_Dang_ky_de_nhan_khuyen_hoc_20_hoc_phi_den_30_06_2022';
+                $responseData = json_encode('');
                 $response = $this->client->request('GET', $link);
-               
+
                 if ($response->getStatusCode() == 200) {
 
                     $bodyCrawler = new Crawler($response->getBody()->getContents());
-                   
-                    $result=$bodyCrawler->filter('table tr td')->each(function (Crawler $node, $i) {
-                        return $node->text();
-                    });
-                    $responseData=json_encode($result);
+
+                    $result = $bodyCrawler->filter('#dnn_ctr1287_ModuleContent > div:nth-child(11)')
+                        ->filter('td')
+                        ->outerHtml();
+                    $result=str_replace('src="/','src="'.ARENA_URI.'/',$result);
+                    $result=str_replace('<ul style="padding-left:9px;">','<ul style="list-style: none; padding-left:9px;">',$result);
+
+                    
+                    $responseData = json_encode(array('content' => $result));
                 }
-               
-                
             } catch (Error $e) {
                 $strErrorDesc = $e->getMessage() . 'Something went wrong! Please contact support.';
                 $strErrorHeader = 'HTTP/1.1 500 Internal Server Error';
-            }catch(GuzzleHttp\Exception\ClientException $ge){
+            } catch (GuzzleHttp\Exception\ClientException $ge) {
                 $strErrorDesc = 'Something went wrong! Please contact support.';
                 $strErrorHeader = 'HTTP/1.1 500 Internal Server Error';
-            }catch(GuzzleHttp\Exception\ConnectException $ce){
+            } catch (GuzzleHttp\Exception\ConnectException $ce) {
                 $strErrorDesc = 'Connection error';
                 $strErrorHeader = 'HTTP/1.1 500 Internal Server Error';
             }
-
         } else {
             $strErrorDesc = 'Method not supported';
             $strErrorHeader = 'HTTP/1.1 422 Unprocessable Entity';
