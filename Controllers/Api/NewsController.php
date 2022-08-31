@@ -95,8 +95,9 @@ class NewsController extends BaseController
 
         if (strtoupper($requestMethod) == 'GET' && isset($_GET['newsLink'])) {
             try {
-                // $link = $_GET['newsLink'];
-                $link = 'https://arenacantho.cusc.vn/?tabid=359&NDID=12571&key=%E2%80%9CHOC_ARENA_MOI_DUNG_LA_MULTIMEDIA%E2%80%9D_Dang_ky_de_nhan_khuyen_hoc_20_hoc_phi_den_30_06_2022';
+                $link = $_GET['newsLink'];
+                // $link = 'https://arenacantho.cusc.vn/?tabid=359&NDID=12571&key=%E2%80%9CHOC_ARENA_MOI_DUNG_LA_MULTIMEDIA%E2%80%9D_Dang_ky_de_nhan_khuyen_hoc_20_hoc_phi_den_30_06_2022';
+                //htmlspecial   https://arenacantho.cusc.vn/?tabid=359&amp;NDID=12571&amp;key=%E2%80%9CHOC_ARENA_MOI_DUNG_LA_MULTIMEDIA%E2%80%9D_Dang_ky_de_nhan_khuyen_hoc_20_hoc_phi_den_30_06_2022
                 $responseData = json_encode('');
                 $response = $this->client->request('GET', $link);
 
