@@ -109,8 +109,8 @@ class NewsController extends BaseController
                     
                     ->text();
 
-                    $content = $bodyCrawler->filter('#dnn_ctr1287_ModuleContent > div:nth-child(11)')
-                        ->filter('td')
+                    $content = $bodyCrawler->filter('cssContContent')
+                        
                         ->outerHtml();
                     $content=str_replace('src="/','src="'.ARENA_URI.'/',$content);
                     $content=str_replace('<ul style="padding-left:9px;">','<ul style="list-style: none; padding-left:9px;">',$content);
