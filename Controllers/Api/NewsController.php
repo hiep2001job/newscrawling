@@ -109,7 +109,7 @@ class NewsController extends BaseController
                     
                     ->text();
 
-                    $content = $bodyCrawler->filter('cssContContent')
+                    $content = $bodyCrawler->filter('.cssContContent')
                         
                         ->outerHtml();
                     $content=str_replace('src="/','src="'.ARENA_URI.'/',$content);
