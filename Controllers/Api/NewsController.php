@@ -18,7 +18,7 @@ class NewsController extends BaseController
                 // Base URI is used with relative requests
                 'base_uri' => ARENA_URI,
                 // You can set any number of default request options.
-                'timeout'  => 10.0,
+                'timeout'  => 5000.0,
             ]);
     }
     /**
