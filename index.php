@@ -24,20 +24,7 @@ $uri = explode('/', $uri);
 
 
 //For dev localhost
-if ((isset($uri[2]) && in_array($uri[2], $domains) && $uri[3] != 'news') || !isset($uri[3])) {
-    header("HTTP/1.1 404 Not Found");
-    exit();
-}
-
-require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
-
-$objFeedController = new NewsController();
-$strMethodName = $uri[4] . 'Action';
-$objFeedController->{$strMethodName}($uri[2]);
-
-
-//For production
-// if ((isset($uri[2]) && in_array($uri[1], $domains) && $uri[2] != 'news') || !isset($uri[2])) {
+// if ((isset($uri[2]) && in_array($uri[2], $domains) && $uri[3] != 'news') || !isset($uri[3])) {
 //     header("HTTP/1.1 404 Not Found");
 //     exit();
 // }
@@ -45,5 +32,18 @@ $objFeedController->{$strMethodName}($uri[2]);
 // require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
 
 // $objFeedController = new NewsController();
-// $strMethodName = $uri[3] . 'Action';
-// $objFeedController->{$strMethodName}($uri[1]);
+// $strMethodName = $uri[4] . 'Action';
+// $objFeedController->{$strMethodName}($uri[2]);
+
+
+//For production
+if ((isset($uri[2]) && in_array($uri[1], $domains) && $uri[2] != 'news') || !isset($uri[2])) {
+    header("HTTP/1.1 404 Not Found");
+    exit();
+}
+
+require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
+
+$objFeedController = new NewsController();
+$strMethodName = $uri[3] . 'Action';
+$objFeedController->{$strMethodName}($uri[1]);
