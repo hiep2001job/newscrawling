@@ -11,35 +11,39 @@ header('Access-Control-Allow-Methods: GET, POST');
 
 header("Access-Control-Allow-Headers: X-Requested-With");
 
-//For dev localhost
-// $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-// $uri = explode( '/', $uri );
+//Domain list
+$domains = array('aptech', 'arena');
 
- 
-// if ((isset($uri[2]) && $uri[2] != 'news') || !isset($uri[3])) {
-//     header("HTTP/1.1 404 Not Found");
-//     exit();
-// }
- 
-// require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
- 
-// $objFeedController = new NewsController();
-// $strMethodName = $uri[3] . 'Action';
-// $objFeedController->{$strMethodName}();
-
-
-//For production
+//Domain parsing
+//Domain detail : $host/aptech/news/list
+//  uri[1] (aptech) : domain name -> parameter in action
+//  uri[2] (news) : controller name
+//  uri[3] (list) : action name
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = explode( '/', $uri );
+$uri = explode('/', $uri);
 
- 
-if ((isset($uri[1]) && $uri[1] != 'news') || !isset($uri[2])) {
+
+//For dev localhost
+if ((isset($uri[2]) && in_array($uri[2], $domains) && $uri[3] != 'news') || !isset($uri[3])) {
     header("HTTP/1.1 404 Not Found");
     exit();
 }
- 
+
 require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
- 
+
 $objFeedController = new NewsController();
-$strMethodName = $uri[2] . 'Action';
-$objFeedController->{$strMethodName}();
+$strMethodName = $uri[4] . 'Action';
+$objFeedController->{$strMethodName}($uri[2]);
+
+
+//For production
+if ((isset($uri[2]) && in_array($uri[1], $domains) && $uri[2] != 'news') || !isset($uri[2])) {
+    header("HTTP/1.1 404 Not Found");
+    exit();
+}
+
+require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
+
+$objFeedController = new NewsController();
+$strMethodName = $uri[3] . 'Action';
+$objFeedController->{$strMethodName}($uri[1]);

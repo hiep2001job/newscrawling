@@ -4,11 +4,12 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Promise\Create;
 use Symfony\Component\DomCrawler\Crawler;
 
-use function GuzzleHttp\Promise\each;
 
 class NewsController extends BaseController
 {
     private ?Client $client = null;
+
+    private string $domain = APTECH_URI;
 
     function __construct()
     {
@@ -16,7 +17,8 @@ class NewsController extends BaseController
         if ($this->client == null)
             $this->client = new Client([
                 // Base URI is used with relative requests
-                'base_uri' => ARENA_URI,
+                //'base_uri' => ARENA_URI,
+                'base_uri' => $this->domain,
                 // You can set any number of default request options.
                 'timeout'  => 5000.0,
             ]);
@@ -24,8 +26,19 @@ class NewsController extends BaseController
     /**
      * "/news/list" Endpoint - Get list of news
      */
-    public function listAction()
+    public function listAction($domain = '')
     {
+        switch ($domain) {
+            case 'aptech':
+                $this->domain = APTECH_URI;
+                break;
+            case 'arena':
+                $this->domain = ARENA_URI;
+                break;
+            default:
+                $this->domain = APTECH_URI;
+        }
+
         $strErrorDesc = '';
         $requestMethod = $_SERVER["REQUEST_METHOD"];
         $arrQueryStringParams = $this->getQueryStringParams();
@@ -33,7 +46,7 @@ class NewsController extends BaseController
         if (strtoupper($requestMethod) == 'GET') {
             try {
 
-                $bodyCrawler = new Crawler($this->client->request('GET')->getBody()->getContents());
+                $bodyCrawler = new Crawler($this->client->request('GET', $this->domain)->getBody()->getContents());
 
                 $result = $bodyCrawler->filter('.other-news-item')->each(function (Crawler $node, $i) {
                     return array(
@@ -43,16 +56,16 @@ class NewsController extends BaseController
                                 return array(
                                     'title' => $news->filter('div .css_tintuc_link_btitle')->text(),
                                     'description' => $news->filter('div p')->text(),
-                                    'link' => ARENA_URI . $news->filter('div .css_tintuc_link_btitle')->extract(['href'])[0],
-                                    'image' => ARENA_URI . $news->filter('div .cms_img_tintuc')->extract(['src'])[0],
+                                    'link' => $this->domain . $news->filter('div .css_tintuc_link_btitle')->extract(['href'])[0],
+                                    'image' => $this->domain . $news->filter('div .cms_img_tintuc')->extract(['src'])[0],
                                 );
                             }),
                             'rest' => $node->filter('.news-content .css_tintuc_tbox')->siblings()->each(function (Crawler $news) {
                                 return array(
                                     'title' => $news->filter('.css_tintuc_link_title')->text(),
                                     'description' => $news->filter('div p')->text(),
-                                    'link' => ARENA_URI . $news->filter('.css_tintuc_link_title')->extract(['href'])[0],
-                                    'image' => ARENA_URI . $news->filter('.css_tintuc_link_title div img')->extract(['src'])[0],
+                                    'link' => $this->domain . $news->filter('.css_tintuc_link_title')->extract(['href'])[0],
+                                    'image' => $this->domain . $news->filter('.css_tintuc_link_title div img')->extract(['src'])[0],
                                 );
                             })
                         )
@@ -87,11 +100,25 @@ class NewsController extends BaseController
     /**
      * "/news/detail" Endpoint - Get detail of news
      */
-    public function detailAction()
+    public function detailAction($domain = '')
     {
+        //Detect domain
+        $contentHtmlClass = '';
+        switch ($domain) {
+            case 'aptech':
+                $this->domain = APTECH_URI;
+                $contentHtmlClass = '.cusc_contentpane';
+                break;
+            case 'arena':
+                $this->domain = ARENA_URI;
+                $contentHtmlClass = '.cssContContent';
+                break;
+            default:
+                $contentHtmlClass = '.cusc_contentpane';
+                $this->domain = APTECH_URI;
+        }
         $strErrorDesc = '';
         $requestMethod = $_SERVER["REQUEST_METHOD"];
-
 
         if (strtoupper($requestMethod) == 'GET' && isset($_GET['newsLink'])) {
             try {
@@ -105,20 +132,30 @@ class NewsController extends BaseController
 
                     $bodyCrawler = new Crawler($response->getBody()->getContents());
 
-                    $title=$bodyCrawler->filter('li.TieuDe')
-                    
-                    ->text();
+                    $title = $bodyCrawler->filter('li.TieuDe')
 
-                    $content = $bodyCrawler->filter('.cssContContent')
-                        
-                        ->outerHtml();
-                    $content=str_replace('src="/','src="'.ARENA_URI.'/',$content);
-                    $content=str_replace('<ul style="padding-left:9px;">','<ul style="list-style: none; padding-left:9px;">',$content);
+                        ->text();
+                    switch ($domain) {
+                        case 'aptech':
+                            $content = $bodyCrawler->filter($contentHtmlClass)->outerHtml();
+                            // Change relative path to absolute path
+                            $content = str_replace('src="/', 'src="' . $this->domain . '/', $content);
+                            break;
+                        case 'arena':
+                            $content = $bodyCrawler->filter($contentHtmlClass)->outerHtml();
+                            // Change relative path to absolute path
+                            $content = str_replace('src="/', 'src="' . $this->domain . '/', $content);
+                            // Modify inline css
+                            $content = str_replace('<ul style="padding-left:9px;">', '<ul style="list-style: none; padding-left:9px;">', $content);
+                            $content = str_replace('style="font-family:comic sans ms,cursive;"', '', $content);
+                            $content = str_replace('font-family: Tahoma, Arial, Helvetica; color: rgb(0, 0, 0); text-align: justify;', '', $content);
 
-                    
+                            break;
+                    }
                     $responseData = json_encode(array(
-                        'title'=>$title,
-                        'content' => $content));
+                        'title' => $title,
+                        'content' => $content
+                    ));
                 }
             } catch (Error $e) {
                 $strErrorDesc = $e->getMessage() . 'Something went wrong! Please contact support.';
