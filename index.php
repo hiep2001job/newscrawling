@@ -24,16 +24,16 @@ $uri = explode('/', $uri);
 
 
 //For dev localhost
-if ((isset($uri[2]) && in_array($uri[2], $domains) && $uri[3] != 'news') || !isset($uri[3])) {
-    header("HTTP/1.1 404 Not Found");
-    exit();
-}
+// if ((isset($uri[2]) && in_array($uri[2], $domains) && $uri[3] != 'news') || !isset($uri[3])) {
+//     header("HTTP/1.1 404 Not Found");
+//     exit();
+// }
 
-require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
+// require PROJECT_ROOT_PATH . "/Controllers/Api/NewsController.php";
 
-$objFeedController = new NewsController();
-$strMethodName = $uri[4] . 'Action';
-$objFeedController->{$strMethodName}($uri[2]);
+// $objFeedController = new NewsController();
+// $strMethodName = $uri[4] . 'Action';
+// $objFeedController->{$strMethodName}($uri[2]);
 
 
 //For production
