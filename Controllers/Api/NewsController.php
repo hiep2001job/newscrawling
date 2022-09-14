@@ -132,9 +132,7 @@ class NewsController extends BaseController
 
                     $bodyCrawler = new Crawler($response->getBody()->getContents());
 
-                    $title = $bodyCrawler->filter('li.TieuDe')
-
-                        ->text();
+                    $title = $bodyCrawler->filter('li.TieuDe')->text();
                     switch ($domain) {
                         case 'aptech':
                             $content = $bodyCrawler->filter($contentHtmlClass)->outerHtml();
@@ -142,17 +140,18 @@ class NewsController extends BaseController
                             $content = str_replace('src="/', 'src="' . $this->domain . '/', $content);
                             break;
                         case 'arena':
-                            $content = $bodyCrawler->filter($contentHtmlClass)->outerHtml();
+                            $content = $bodyCrawler->filter($contentHtmlClass)->filter('td')->outerHtml();
                             // Change relative path to absolute path
                             $content = str_replace('src="/', 'src="' . $this->domain . '/', $content);
                             // Modify inline css
                             $content = str_replace('<ul style="padding-left:9px;">', '<ul style="list-style: none; padding-left:9px;">', $content);
                             $content = str_replace('style="font-family:comic sans ms,cursive;"', '', $content);
-                            $content = str_replace('font-family: Tahoma, Arial, Helvetica; color: rgb(0, 0, 0); text-align: justify;', '', $content);
+                            $content = str_replace('font-family: Tahoma, Arial, Helvetica; color: rgb(0, 0, 0);', '', $content);
                             $content = str_replace('font-size:12px;', 'font-size:1.1rem;', $content);
                             $content = str_replace('line-height: 16px;', 'line-height: 1.2rem;', $content);
+                          
                             break;
-                    }
+                    } 
                     $responseData = json_encode(array(
                         'title' => $title,
                         'content' => $content
