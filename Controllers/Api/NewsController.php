@@ -149,7 +149,7 @@ class NewsController extends BaseController
                             $content = str_replace('<ul style="padding-left:9px;">', '<ul style="list-style: none; padding-left:9px;">', $content);
                             $content = str_replace('style="font-family:comic sans ms,cursive;"', '', $content);
                             $content = str_replace('font-family: Tahoma, Arial, Helvetica; color: rgb(0, 0, 0); text-align: justify;', '', $content);
-
+                            $content = str_replace('font-size:12px;', 'font-size:1.2rem;', $content);
                             break;
                     }
                     $responseData = json_encode(array(
